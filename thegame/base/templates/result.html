@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Prediction Result</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+    <style>
+        .center {
+            position: absolute;
+            text-align: center;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            font-family: Arial, Helvetica, sans-serif;
+            background-color: rgb(230, 239, 245);
+            padding: 2rem;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="center">
+        <h2>Predicted Revenue</h2>
+        <h1 style="color: #28a745; margin: 20px 0;">${{ result }} Million</h1>
+        <p>Based on the provided game characteristics</p>
+        <a href="/" class="btn btn-primary">Make Another Prediction</a>
+    </div>
+</body>
+</html>
