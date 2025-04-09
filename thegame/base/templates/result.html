@@ -2,28 +2,42 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Prediction Result</title>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+    <title>Result</title>
     <style>
-        .center {
-            position: absolute;
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 500px;
+            margin: 40px auto;
+            padding: 20px;
             text-align: center;
-            left: 50%;
-            top: 50%;
-            transform: translate(-50%, -50%);
-            font-family: Arial, Helvetica, sans-serif;
-            background-color: rgb(230, 239, 245);
-            padding: 2rem;
-            border-radius: 10px;
+            background: #f0f2f5;
+        }
+        .result-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .result {
+            color: #28a745;
+            font-size: 24px;
+            margin: 20px 0;
+        }
+        a {
+            display: inline-block;
+            padding: 8px 16px;
+            background: #28a745;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
         }
     </style>
 </head>
 <body>
-    <div class="center">
-        <h2>Predicted Revenue</h2>
-        <h1 style="color: #28a745; margin: 20px 0;">${{ result }} Million</h1>
-        <p>Based on the provided game characteristics</p>
-        <a href="/" class="btn btn-primary">Make Another Prediction</a>
+    <div class="result-container">
+        <h2>Prediction Result</h2>
+        <div class="result">{{ result }}</div>
+        <a href="/">Try Again</a>
     </div>
 </body>
 </html>

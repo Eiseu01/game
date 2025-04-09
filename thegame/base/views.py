@@ -4,44 +4,46 @@ import pickle
 def home(request):
     return render(request, 'index.html')
 
-def getPredictions(genre, platform, release_year, developer, players, peak_players, metacritic, esports, trending):
-    model = pickle.load(open("d:/lol/GamingPrediction/thegame/base/ml_model.sav", "rb"))
-    scaler = pickle.load(open("d:/lol/GamingPrediction/thegame/base/scaler.sav", "rb"))
+def getPredictions(genre, platform, release_year, players, peak_players, metacritic, trending):
+    model = pickle.load(open("d:/lol/GamingPrediction/Model/ml_model.sav", "rb"))
+    scaler = pickle.load(open("d:/lol/GamingPrediction/Model/scaler.sav", "rb"))
     
-    # Convert categorical variables to numeric
-    genre_map = {'Action': 0, 'Adventure': 1, 'RPG': 2, 'Strategy': 3}
-    platform_map = {'PC': 0, 'PlayStation': 1, 'Xbox': 2, 'Nintendo': 3}
-    trending_map = {'Trending': 2, 'Stable': 1, 'Declining': 0}
+    # Convert categorical variables
+    genre_map = {
+        'Action': 0, 'Adventure': 1, 'RPG': 2, 'Strategy': 3, 'Sports': 4,
+        'Racing': 5, 'Horror': 6, 'Fighting': 7, 'Shooter': 8, 'Simulation': 9
+    }
+    platform_map = {
+        'PC': 0, 'PlayStation': 1, 'Xbox': 2, 'Nintendo Switch': 3,
+        'Mobile': 4, 'Cross-Platform': 5
+    }
+    trending_map = {'Rising': 2, 'Stable': 1, 'Declining': 0}
     
-    genre_num = genre_map[genre]
-    platform_num = platform_map[platform]
-    trending_num = trending_map[trending]
+    # Calculate features with adjusted scale
+    player_retention = (float(peak_players) / (float(players) * 1000000)) * 100  # Convert to percentage
+    recent_release = min(2024 - int(release_year), 5)
+    high_rating = 1 if float(metacritic) >= 75 else 0
     
-    # Print values for debugging
-    print(f"Input values: {genre_num}, {platform_num}, {release_year}, {players}, {peak_players}, {metacritic}, {esports}, {trending_num}")
-    
-    features = [genre_num, platform_num, int(release_year), float(players), 
-               int(peak_players), float(metacritic), float(esports), trending_num]
+    features = [
+        genre_map[genre],
+        platform_map[platform],
+        recent_release,
+        player_retention,
+        high_rating,
+        trending_map[trending]
+    ]
     
     prediction = model.predict(scaler.transform([features]))
-    
-    # Print prediction for debugging
-    print(f"Raw prediction: {prediction[0]}")
-    
-    return f'{prediction[0]:.2f}'
+    return "Yes" if prediction[0] == 1 else "No"
 
 def result(request):
-    game_title = request.GET['game_title']
     genre = request.GET['genre']
     platform = request.GET['platform']
     release_year = request.GET['release_year']
-    developer = request.GET['developer']
     players = request.GET['players']
     peak_players = request.GET['peak_players']
     metacritic = request.GET['metacritic']
-    esports = request.GET['esports']
     trending = request.GET['trending']
     
-    result = getPredictions(genre, platform, release_year, developer, players, peak_players, metacritic, esports, trending)
-    
+    result = getPredictions(genre, platform, release_year, players, peak_players, metacritic, trending)
     return render(request, 'result.html', {'result': result})

@@ -1,51 +1,80 @@
-import pickle
 import pandas as pd
-import numpy as np
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import MinMaxScaler, LabelEncoder
-from sklearn.ensemble import RandomForestRegressor
-from sklearn.metrics import r2_score, mean_squared_error
+from sklearn.preprocessing import StandardScaler
+from sklearn.ensemble import GradientBoostingClassifier
+from sklearn.metrics import accuracy_score, precision_score, recall_score
+import pickle
 
-# Load data
-dataset = pd.read_csv('d:/lol/GamingPrediction/Model/gaming_industry_trends.csv', encoding='latin-1')
-dataset = dataset.rename(columns=lambda x: x.strip().lower())
+# Define mappings first
+genre_map = {
+    'Action': 0, 'Adventure': 1, 'RPG': 2, 'Strategy': 3, 'Sports': 4,
+    'Racing': 5, 'Horror': 6, 'Fighting': 7, 'Shooter': 8, 'Simulation': 9
+}
 
-# Updated column names to match your CSV file
-dataset = dataset[['genre', 'platform', 'release year', 'players (millions)',
-                  'peak concurrent players', 'metacritic score', 
-                  'esports popularity', 'trending status', 'revenue (millions $)']]
+platform_map = {
+    'PC': 0, 'PlayStation': 1, 'Xbox': 2, 'Nintendo Switch': 3,
+    'Mobile': 4, 'Cross-Platform': 5
+}
 
-# Convert all categorical variables using LabelEncoder
-le = LabelEncoder()
-categorical_columns = ['genre', 'platform', 'trending status']
-for col in categorical_columns:
-    dataset[col] = le.fit_transform(dataset[col].astype(str))
+trending_map = {'Rising': 2, 'Stable': 1, 'Declining': 0}
 
-# Handle Esports Popularity separately as it might be categorical
-dataset['esports popularity'] = pd.to_numeric(dataset['esports popularity'], errors='coerce')
-if dataset['esports popularity'].isnull().any():
-    # If it's categorical, encode it
-    dataset['esports popularity'] = le.fit_transform(dataset['esports popularity'].fillna('None').astype(str))
+# Load and preprocess data
+dataset = pd.read_csv('d:/lol/GamingPrediction/Model/gaming_industry_trends.csv')
 
-# Handle other numeric columns
-numeric_columns = ['release year', 'players (millions)', 'peak concurrent players', 
-                  'metacritic score', 'revenue (millions $)']
-for col in numeric_columns:
-    dataset[col] = pd.to_numeric(dataset[col], errors='coerce')
-    dataset[col] = dataset[col].fillna(dataset[col].median())
+# Convert Peak Concurrent Players from millions to thousands
+dataset['Peak Concurrent Players'] = dataset['Peak Concurrent Players'] * 1000
 
-print("\nFinal data shape:", dataset.shape)
-print("\nSample of processed data:")
-print(dataset.head())
+# Feature engineering
+dataset['Genre'] = dataset['Genre'].map(genre_map)
+dataset['Platform'] = dataset['Platform'].map(platform_map)
+dataset['Trending Status'] = dataset['Trending Status'].map(trending_map)
 
-X = dataset.drop(['revenue (millions $)'], axis=1)
-y = dataset['revenue (millions $)']
+# Adjusted player retention calculation for thousands of concurrent players
+dataset['Player_Retention'] = (dataset['Peak Concurrent Players'] / (dataset['Players (Millions)'] * 1000000)) * 100
+dataset['Recent_Release'] = (2024 - dataset['Release Year']).clip(upper=5)
+dataset['High_Rating'] = (dataset['Metacritic Score'] >= 75).astype(int)
 
-sc = MinMaxScaler(feature_range=(0, 1))
-X_scaled = sc.fit_transform(X)
+# Select features
+X = dataset[[
+    'Genre', 'Platform', 'Recent_Release',
+    'Player_Retention', 'High_Rating', 'Trending Status'
+]]
 
-rf_model = RandomForestRegressor(n_estimators=100, random_state=42)
-rf_model.fit(X_scaled, y)
+# Target variable
+y = (dataset['Esports Popularity'] == 'Yes').astype(int)
 
-pickle.dump(rf_model, open("ml_model.sav", "wb"))
-pickle.dump(sc, open("scaler.sav", "wb"))
+# Split data with stratification
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42, stratify=y
+)
+
+# Scale features
+scaler = StandardScaler()
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_scaled = scaler.transform(X_test)
+
+# Use GradientBoostingClassifier with conservative parameters
+gb_model = GradientBoostingClassifier(
+    n_estimators=100,
+    learning_rate=0.1,
+    max_depth=3,
+    min_samples_split=5,
+    min_samples_leaf=3,
+    subsample=0.8,
+    random_state=42
+)
+
+gb_model.fit(X_train_scaled, y_train)
+
+# Evaluate model
+train_pred = gb_model.predict(X_train_scaled)
+test_pred = gb_model.predict(X_test_scaled)
+
+print("Training Accuracy:", accuracy_score(y_train, train_pred))
+print("Testing Accuracy:", accuracy_score(y_test, test_pred))
+print("Precision Score:", precision_score(y_test, test_pred))
+print("Recall Score:", recall_score(y_test, test_pred))
+
+# Save model and scaler
+pickle.dump(gb_model, open("ml_model.sav", "wb"))
+pickle.dump(scaler, open("scaler.sav", "wb"))

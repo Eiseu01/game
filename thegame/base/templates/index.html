@@ -1,101 +1,77 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
-
+<html lang="en">
 <head>
-  <meta charset="utf-8">
-  <title>Home page</title>
-
-  <script src="https://kit.fontawesome.com/47101d2035.js" crossorigin="anonymous"></script>
-
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
-    integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-
-  <style>
-    .center {
-      position: absolute;
-      text-align: center;
-      left: 50%;
-      top: 50%;
-      transform: translate(-50%, -50%);
-      font-family: Arial, Helvetica, sans-serif;
-      background-color: rgb(230, 239, 245);
-    }
-  </style>
+    <meta charset="utf-8">
+    <title>Esports Predictor</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 500px;
+            margin: 40px auto;
+            padding: 20px;
+            background: #f0f2f5;
+        }
+        .form-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        select, input, button {
+            width: 100%;
+            padding: 8px;
+            margin: 8px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            background: #28a745;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        h1 { color: #333; }
+    </style>
 </head>
-
-<body class="center">
-
-  <h1 style="color:rgb(44, 44, 90); font-weight: 700;">
-    <i class="fas fa-gamepad"></i> Game Revenue Predictor
-  </h1>
-
-  <p style="color:rgb(51, 51, 83); font-weight: 700;">
-    Predict the revenue of a game based on its characteristics
-  </p>
-
-  <form action="result">
-    {% csrf_token %}
-
-    <div class="form-group">
-      <input class="form-control" placeholder="Game Title" required type="text" name="game_title">
+<body>
+    <div class="form-container">
+        <h1>Esports Predictor</h1>
+        <form action="result">
+            {% csrf_token %}
+            <select required name="genre">
+                <option value="" disabled selected>Select Genre</option>
+                <option value="Action">Action</option>
+                <option value="Adventure">Adventure</option>
+                <option value="RPG">RPG</option>
+                <option value="Strategy">Strategy</option>
+                <option value="Sports">Sports</option>
+                <option value="Racing">Racing</option>
+                <option value="Horror">Horror</option>
+                <option value="Fighting">Fighting</option>
+                <option value="Shooter">Shooter</option>
+                <option value="Simulation">Simulation</option>
+            </select>
+            <select required name="platform">
+                <option value="" disabled selected>Select Platform</option>
+                <option value="PC">PC</option>
+                <option value="PlayStation">PlayStation</option>
+                <option value="Xbox">Xbox</option>
+                <option value="Nintendo Switch">Nintendo Switch</option>
+                <option value="Mobile">Mobile</option>
+                <option value="Cross-Platform">Cross-Platform</option>
+            </select>
+            <input type="number" name="release_year" placeholder="Release Year (2000-2024)" required min="2000" max="2024">
+            <input type="number" name="players" placeholder="Players (Millions)" required step="0.1">
+            <input type="number" name="peak_players" placeholder="Peak Concurrent Players" required>
+            <input type="number" name="metacritic" placeholder="Metacritic Score (0-100)" required min="0" max="100">
+            <select required name="trending">
+                <option value="" disabled selected>Select Trending Status</option>
+                <option value="Rising">Rising</option>
+                <option value="Stable">Stable</option>
+                <option value="Declining">Declining</option>
+            </select>
+            <button type="submit">Predict</button>
+        </form>
     </div>
-
-    <div class="form-group">
-      <select class="form-control" required name="genre">
-        <option value="" disabled selected>Select Genre</option>
-        <option value="Action">Action</option>
-        <option value="Adventure">Adventure</option>
-        <option value="RPG">RPG</option>
-        <option value="Strategy">Strategy</option>
-      </select>
-    </div>
-
-    <div class="form-group">
-      <select class="form-control" required name="platform">
-        <option value="" disabled selected>Select Platform</option>
-        <option value="PC">PC</option>
-        <option value="PlayStation">PlayStation</option>
-        <option value="Xbox">Xbox</option>
-        <option value="Nintendo">Nintendo</option>
-      </select>
-    </div>
-
-    <div class="form-group">
-      <input class="form-control" placeholder="Release Year (2000-2024)" required type="number" name="release_year" min="2000" max="2024">
-    </div>
-
-    <div class="form-group">
-      <input class="form-control" placeholder="Developer" required type="text" name="developer">
-    </div>
-
-    <div class="form-group">
-      <input class="form-control" placeholder="Players (Millions)" required type="number" step="0.1" name="players">
-    </div>
-
-    <div class="form-group">
-      <input class="form-control" placeholder="Peak Concurrent Players" required type="number" name="peak_players">
-    </div>
-
-    <div class="form-group">
-      <input class="form-control" placeholder="Metacritic Score (0-100)" required type="number" name="metacritic" min="0" max="100">
-    </div>
-
-    <div class="form-group">
-      <input class="form-control" placeholder="Esports Popularity (0-10)" required type="number" step="0.1" name="esports" min="0" max="10">
-    </div>
-
-    <div class="form-group">
-      <select class="form-control" required name="trending">
-        <option value="" disabled selected>Select Trending Status</option>
-        <option value="Trending">Trending</option>
-        <option value="Stable">Stable</option>
-        <option value="Declining">Declining</option>
-      </select>
-    </div>
-
-    <input class="btn btn-primary btn-lg btn-block" type="submit" value='Predict'>
-
-  </form>
 </body>
-
 </html>
